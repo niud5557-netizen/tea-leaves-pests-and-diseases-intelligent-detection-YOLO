@@ -5,7 +5,7 @@ const severityNames = { low: '轻度', medium: '中度', high: '重度', healthy
 function q(id) { return document.getElementById(id); }
 function esc(value) { return String(value == null ? '' : value).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch])); }
 function toast(message) { const el = q('toast'); if (!el) return alert(message); el.textContent = message; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 2200); }
-async function api(url, options) { const response = await fetch(url, options); const data = await response.json(); if (!response.ok) throw new Error(data.error || '请求失败'); return data; }
+async function api(url, options) { try { const response = await fetch(url, options); const text = await response.text(); let data; try { data = text ? JSON.parse(text) : {}; } catch { data = text; } if (!response.ok) throw new Error((data && data.error) || '请求失败'); return data; } catch (error) { if (window.teaDemoApi) return window.teaDemoApi.request(url, options); throw error; } }
 function statusLabel(status) { return { healthy: '健康', diagnosed: '已诊断', expert_review: '待专家复核', reviewed: '专家已复核', treated: '已处置', closed: '已闭环', pending: '待完成', completed: '已完成' }[status] || status; }
 function formatDate(value) { return value ? new Date(value).toLocaleString('zh-CN', { hour12: false }) : '暂无'; }
 function ratio(value) { return value == null ? '—' : (value * 100).toFixed(1) + '%'; }
@@ -139,7 +139,7 @@ function bindEvents() {
     await api('/api/fields', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ garden: '新增试点茶园', name, areaMu: 10, variety: '待补充', owner: '项目团队' }) });
     await loadAll();
   };
-  q('downloadReport').onclick = () => window.open('/api/report/summary', '_blank');
+  q('downloadReport').onclick = async () => { const report = await api('/api/report/summary'); const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob); window.open(url, '_blank'); setTimeout(() => URL.revokeObjectURL(url), 60000); };
 }
 
 bindEvents();
