@@ -1,0 +1,1 @@
+const api=require('../../utils/api');Page({data:{records:[]},onShow(){this.load()},async load(){try{this.setData({records:await api.request('/api/records')})}catch(e){}}});

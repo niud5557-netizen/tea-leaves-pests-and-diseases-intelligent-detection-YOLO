@@ -1,0 +1,20 @@
+{
+  "name": "ai-tea-check-upgraded",
+  "version": "2.1.0",
+  "private": true,
+  "type": "module",
+  "description": "AI茶查查三端一体化茶园病虫害智能识别与绿色防控系统",
+  "scripts": {
+    "start": "node server.mjs",
+    "verify": "node scripts/verify.mjs",
+    "prepare:data": "python scripts/prepare_dataset.py",
+    "train:model": "python scripts/train.py",
+    "export:model": "python scripts/export_model.py"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "sharp": "^0.34.3"
+  }
+}

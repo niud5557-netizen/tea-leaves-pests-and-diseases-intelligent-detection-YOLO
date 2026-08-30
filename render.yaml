@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: ai-tea-check
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: ANALYZER_MODE
+        value: model
+      - key: REVIEW_THRESHOLD
+        value: "0.72"

@@ -1,0 +1,32 @@
+{
+  "class_names": [
+    "healthy",
+    "algal_leaf",
+    "anthracnose",
+    "bird_eye_spot",
+    "brown_blight",
+    "gray_blight",
+    "red_leaf_spot",
+    "white_spot",
+    "tea_white_scab",
+    "tea_blister_blight",
+    "tea_blister_blight_perforation",
+    "leaf_beetle",
+    "apolygus_lucorum"
+  ],
+  "display_names": {
+    "healthy": "健康叶片",
+    "algal_leaf": "藻斑病",
+    "anthracnose": "茶炭疽病",
+    "bird_eye_spot": "鸟眼斑",
+    "brown_blight": "褐斑病",
+    "gray_blight": "灰斑病",
+    "red_leaf_spot": "红叶斑",
+    "white_spot": "白斑病",
+    "tea_white_scab": "茶白星病/白痂症状",
+    "tea_blister_blight": "茶饼病",
+    "tea_blister_blight_perforation": "茶饼病穿孔期",
+    "leaf_beetle": "叶甲类虫害",
+    "apolygus_lucorum": "绿盲蝽类虫害"
+  }
+}

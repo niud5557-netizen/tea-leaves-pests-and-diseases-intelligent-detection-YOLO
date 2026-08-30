@@ -1,0 +1,1 @@
+<view class="page"><view class="card" wx:for="{{fields}}" wx:key="id"><view class="name">{{item.name}}</view><view class="muted">{{item.garden}} · {{item.areaMu}}亩</view><view class="row"><text>品种</text><text>{{item.variety}}</text></view><view class="row"><text>负责人</text><text>{{item.owner}}</text></view><view class="tag">风险：{{item.risk}}</view></view></view>

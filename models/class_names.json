@@ -1,0 +1,17 @@
+{
+  "class_names": [
+    "algal_leaf",
+    "anthracnose",
+    "apolygus_lucorum",
+    "bird_eye_spot",
+    "brown_blight",
+    "gray_blight",
+    "healthy",
+    "leaf_beetle",
+    "red_leaf_spot",
+    "tea_blister_blight",
+    "tea_blister_blight_perforation",
+    "tea_white_scab",
+    "white_spot"
+  ]
+}

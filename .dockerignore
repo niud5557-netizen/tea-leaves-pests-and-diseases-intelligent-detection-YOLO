@@ -1,0 +1,11 @@
+node_modules/
+.venv/
+dataset/
+models/*.pth
+models/*.pt
+models/*.ckpt
+models/*.log
+data/uploads/
+data/logs/
+data/reports/
+.git/

@@ -1,0 +1,1 @@
+const api=require('../../utils/api');Page({data:{tasks:[]},onShow(){this.load()},async load(){try{this.setData({tasks:await api.request('/api/tasks')})}catch(e){}},async complete(e){await api.request('/api/tasks/'+e.currentTarget.dataset.id+'/complete','POST',{note:'小程序端完成'});wx.showToast({title:'任务已完成'});this.load()}});

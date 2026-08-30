@@ -1,0 +1,28 @@
+# system and dependencies
+.venv/
+node_modules/
+__pycache__/
+*.pyc
+
+# raw and generated data
+/data/uploads/
+/data/logs/
+/data/database.json
+/data/reports/
+/dataset/external/
+/dataset/prepared/imagefolder/
+/dataset/prepared/metadata.csv
+/dataset/prepared/reports/
+
+# model training artifacts
+/models/*.pth
+/models/*.pt
+/models/*.ckpt
+/models/*.log
+
+# local caches and temporary files
+*.tmp
+*.log
+*.cache
+.DS_Store
+Thumbs.db

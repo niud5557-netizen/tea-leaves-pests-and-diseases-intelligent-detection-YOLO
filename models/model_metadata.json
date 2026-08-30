@@ -1,0 +1,21 @@
+{
+  "onnx": "models\\tea_disease_pest.onnx",
+  "class_names": [
+    "algal_leaf",
+    "anthracnose",
+    "apolygus_lucorum",
+    "bird_eye_spot",
+    "brown_blight",
+    "gray_blight",
+    "healthy",
+    "leaf_beetle",
+    "red_leaf_spot",
+    "tea_blister_blight",
+    "tea_blister_blight_perforation",
+    "tea_white_scab",
+    "white_spot"
+  ],
+  "image_size": 224,
+  "checkpoint": "models\\tea_disease_pest_mobilenetv3_best.pth",
+  "model_family": "MobileNetV3-Small"
+}
