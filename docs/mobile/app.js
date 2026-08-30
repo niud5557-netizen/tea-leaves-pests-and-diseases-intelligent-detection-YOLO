@@ -1,0 +1,104 @@
+var ms = { fields: [], records: [], tasks: [], current: null };
+var cn = { healthy: '健康叶片', algal_leaf: '藻斑病', anthracnose: '茶炭疽病', bird_eye_spot: '鸟眼斑', brown_blight: '褐斑病', gray_blight: '灰斑病', red_leaf_spot: '红叶斑', white_spot: '白斑病', tea_white_scab: '茶白星病/白痂症状', tea_blister_blight: '茶饼病', tea_blister_blight_perforation: '茶饼病穿孔期', leaf_beetle: '叶甲类虫害', apolygus_lucorum: '绿盲蝽类虫害', unknown: '疑似未知症状' };
+
+function e(id) { return document.getElementById(id); }
+function mt(msg) { var x = e('mToast'); x.textContent = msg; x.classList.add('show'); setTimeout(function () { x.classList.remove('show'); }, 2000); }
+async function ma(url, opt) {
+  try {
+    var r = await fetch(url, opt);
+    var t = await r.text();
+    var d;
+    try { d = t ? JSON.parse(t) : {}; } catch { d = t; }
+    if (!r.ok) throw new Error(d && d.error || '请求失败');
+    return d;
+  } catch (err) {
+    if (window.teaDemoApi) return window.teaDemoApi.request(url, opt);
+    throw err;
+  }
+}
+function fd(v) { return v ? new Date(v).toLocaleString('zh-CN', { hour12: false }) : '暂无'; }
+function risk(r) { return r === 'high' ? '高风险' : r === 'medium' ? '中风险' : '低风险'; }
+function show(name) {
+  document.querySelectorAll('.mview').forEach(function (v) { v.style.display = 'none'; });
+  e('m-' + name).style.display = 'block';
+  document.querySelectorAll('[data-mgo]').forEach(function (a) { a.classList.toggle('active', a.dataset.mgo === name); });
+}
+
+async function load() {
+  var a = await Promise.all([ma('/api/dashboard'), ma('/api/fields'), ma('/api/records'), ma('/api/tasks')]);
+  var d = a[0];
+  ms.fields = a[1];
+  ms.records = a[2];
+  ms.tasks = a[3];
+  e('mRecords').textContent = d.records;
+  e('mReviews').textContent = d.reviews;
+  e('mTasks').textContent = d.tasks - d.completedTasks;
+  e('mFieldSelect').innerHTML = ms.fields.map(function (f) { return '<option value="' + f.id + '">' + f.garden + ' / ' + f.name + '</option>'; }).join('');
+  e('mFieldList').innerHTML = ms.fields.map(function (f) { return '<div class="mobile-list-item"><div><b>' + f.name + '</b><div class="small muted">' + f.areaMu + '亩 · ' + f.variety + '</div></div><span class="status ' + f.risk + '">' + risk(f.risk) + '</span></div>'; }).join('');
+  var latest = ms.records.slice(0, 4);
+  e('mRecent').innerHTML = latest.length ? latest.map(item).join('') : '<div class="empty">暂无记录</div>';
+  e('mHistory').innerHTML = ms.records.length ? ms.records.map(item).join('') : '<div class="empty">暂无记录</div>';
+  e('mTaskList').innerHTML = ms.tasks.length ? ms.tasks.map(function (t) { return '<div class="mobile-list-item"><div><b>' + t.title + '</b><div class="small muted">' + (t.field ? t.field.name : '') + ' · ' + fd(t.dueAt) + '</div></div><span class="status ' + t.status + '">' + (t.status === 'completed' ? '已完成' : '待复查') + '</span></div>'; }).join('') : '<div class="empty">暂无任务</div>';
+}
+
+function item(r) {
+  return '<div class="mobile-list-item"><div><b>' + (r.diseaseName || cn[r.result.classCode]) + '</b><div class="small muted">' + (r.field ? r.field.name : '') + ' · ' + fd(r.createdAt) + '</div></div><span class="status ' + r.result.severity + '">' + (r.result.severity === 'high' ? '重度' : r.result.severity === 'medium' ? '中度' : r.result.severity === 'healthy' ? '健康' : '轻度') + '</span></div>';
+}
+
+function result(r) {
+  ms.current = r;
+  e('mResult').style.display = 'block';
+  e('mResultImage').src = r.imageUrl;
+  e('mResultName').textContent = r.diseaseName;
+  var ratio = r.result.lesionRatio == null ? '—' : (r.result.lesionRatio * 100).toFixed(1) + '%';
+  e('mResultDetail').innerHTML = '<div class="mobile-list"><div class="mobile-list-item"><span>模型把握度</span><b>' + Math.round(r.result.confidence * 1000) / 10 + '%</b></div><div class="mobile-list-item"><span>病斑/虫口指标</span><b>' + ratio + '</b></div><div class="mobile-list-item"><span>图像质量</span><b>' + r.result.quality.score + '分</b></div></div><p>' + r.advice + '</p>';
+  e('mDisclaimer').textContent = r.result.disclaimer;
+  var b = e('mLesion');
+  if (r.result.lesionBox) {
+    b.style.display = 'block';
+    b.style.left = r.result.lesionBox.x + '%';
+    b.style.top = r.result.lesionBox.y + '%';
+    b.style.width = r.result.lesionBox.width + '%';
+    b.style.height = r.result.lesionBox.height + '%';
+  } else {
+    b.style.display = 'none';
+  }
+}
+
+document.querySelectorAll('[data-mgo]').forEach(function (a) {
+  a.onclick = function (ev) {
+    ev.preventDefault();
+    show(a.dataset.mgo);
+  };
+});
+
+e('mUpload').onsubmit = async function (ev) {
+  ev.preventDefault();
+  var f = new FormData(ev.target);
+  f.set('source', 'mobile-web');
+  try {
+    mt('正在识别');
+    var r = await ma('/api/predict', { method: 'POST', body: f });
+    result(r);
+    mt('识别完成');
+    load();
+  } catch (err) {
+    mt(err.message);
+  }
+};
+
+e('mReview').onclick = async function () {
+  if (!ms.current) return;
+  await ma('/api/records/' + ms.current.id + '/review', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ expert: '移动农技员', comment: '已提交移动端专家复核' }) });
+  mt('已提交专家复核');
+  load();
+};
+
+e('mTreat').onclick = async function () {
+  if (!ms.current) return;
+  await ma('/api/records/' + ms.current.id + '/treatment', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ measure: '现场已完成基础农业防控处理', operator: '移动巡园员' }) });
+  mt('处置已记录并生成复查任务');
+  load();
+};
+
+load().catch(function (err) { mt(err.message); });
