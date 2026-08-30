@@ -34,7 +34,7 @@ function renderMap() {
 function renderBars() {
   const counts = state.dashboard?.classCounts || {};
   const entries = Object.entries(counts).sort((left, right) => right[1] - left[1]);
-  if (!entries.length) { q('classBars').innerHTML = '<div class="empty">完成一次识别后显示病虫害分布</div>'; return; }
+  if (!entries.length) { q('classBars').innerHTML = '<div class="empty">完成一次识别后，这里将实时汇总病虫害分布。</div>'; return; }
   const max = Math.max(...entries.map((entry) => entry[1]));
   q('classBars').innerHTML = entries.map(([code, count]) => `<div class="bar-row"><span>${esc(displayName(code))}</span><div class="progress"><span style="width:${Math.max(8, count / max * 100)}%"></span></div><b>${count}</b></div>`).join('');
 }
@@ -54,14 +54,14 @@ function renderRecords() {
 }
 function renderReviews() {
   const records = state.records.filter((record) => record.status === 'expert_review');
-  q('reviewRows').innerHTML = records.length ? records.map((record) => `<tr><td><div class="record-cell"><img class="thumb" src="${record.imageUrl}"><b>${esc(record.diseaseName)}</b></div></td><td>${esc(record.field ? record.field.name : '—')}</td><td>${esc(record.diseaseName)} · ${Math.round((record.result?.confidence || 0) * 100)}%</td><td>${record.result?.quality?.score || '—'}分</td><td>${formatDate(record.createdAt)}</td><td><button class="btn" data-review="${record.id}">专家确认</button></td></tr>`).join('') : '<tr><td colspan="6"><div class="empty">当前没有待复核病例，页面已正常打开。</div></td></tr>';
+  q('reviewRows').innerHTML = records.length ? records.map((record) => `<tr><td><div class="record-cell"><img class="thumb" src="${record.imageUrl}"><b>${esc(record.diseaseName)}</b></div></td><td>${esc(record.field ? record.field.name : '—')}</td><td>${esc(record.diseaseName)} · ${Math.round((record.result?.confidence || 0) * 100)}%</td><td>${record.result?.quality?.score || '—'}分</td><td>${formatDate(record.createdAt)}</td><td><button class="btn" data-review="${record.id}">专家确认</button></td></tr>`).join('') : '<tr><td colspan="6"><div class="empty">当前没有待复核病例，工作台运行正常。</div></td></tr>';
 }
 function renderTasks() {
-  q('taskCards').innerHTML = state.tasks.length ? state.tasks.map((task) => `<div class="card"><div class="section-head"><div><span class="status ${esc(task.status)}">${statusLabel(task.status)}</span><h3>${esc(task.title)}</h3></div><div class="metric-icon">◷</div></div><p class="muted small">${esc(task.field ? task.field.name : '—')}</p><div class="mobile-list"><div class="mobile-list-item"><span>责任人</span><b>${esc(task.assignee)}</b></div><div class="mobile-list-item"><span>复查期限</span><span>${formatDate(task.dueAt)}</span></div></div>${task.status !== 'completed' ? `<button class="btn secondary" style="margin-top:14px" data-complete="${task.id}">标记完成</button>` : ''}</div>`).join('') : '<div class="card empty">处置复查页面已正常打开；识别并生成处置后，任务将在此显示。</div>';
+  q('taskCards').innerHTML = state.tasks.length ? state.tasks.map((task) => `<div class="card"><div class="section-head"><div><span class="status ${esc(task.status)}">${statusLabel(task.status)}</span><h3>${esc(task.title)}</h3></div><div class="metric-icon">◷</div></div><p class="muted small">${esc(task.field ? task.field.name : '—')}</p><div class="mobile-list"><div class="mobile-list-item"><span>责任人</span><b>${esc(task.assignee)}</b></div><div class="mobile-list-item"><span>复查期限</span><span>${formatDate(task.dueAt)}</span></div></div>${task.status !== 'completed' ? `<button class="btn secondary" style="margin-top:14px" data-complete="${task.id}">标记完成</button>` : ''}</div>`).join('') : '<div class="card empty">处置复查工作台运行正常；完成识别并生成处置后，复查任务将在此显示。</div>';
 }
 function renderModel() {
   const model = state.dashboard?.model || { mode: 'unknown', version: 'unknown', supportedClasses: [], notice: '' };
-  q('modelPill').textContent = model.mode === 'demo' ? '演示分析器' : '真实模型 ' + model.version;
+  q('modelPill').textContent = model.mode === 'demo' ? '浏览器演示模式' : '真实模型 ' + model.version;
   q('modelInfo').innerHTML = `<div class="mobile-list"><div class="mobile-list-item"><span>版本</span><b>${esc(model.version)}</b></div><div class="mobile-list-item"><span>运行模式</span><span class="status ${model.mode === 'demo' ? 'medium' : 'reviewed'}">${esc(model.mode)}</span></div><div class="mobile-list-item"><span>支持类别</span><b>${model.supportedClasses.length}类</b></div><div class="mobile-list-item"><span>模型文件</span><b>${esc(model.modelFile || 'models/tea_disease_pest.onnx')}</b></div></div><p class="footer-note">${esc(model.notice)}</p>`;
 }
 function renderFieldOptions() { q('uploadField').innerHTML = state.fields.map((field) => `<option value="${field.id}">${esc(field.garden)} / ${esc(field.name)}</option>`).join(''); }
@@ -81,7 +81,7 @@ function showResult(record) {
   q('resultCard').style.display = 'block';
   q('resultImage').src = record.imageUrl;
   q('resultName').textContent = record.diseaseName || displayName(record.result?.classCode);
-  q('resultEngine').textContent = record.result?.engine?.includes('onnx') ? '真实模型 · ' + record.result.engine : '演示/回退分析器';
+  q('resultEngine').textContent = record.result?.engine?.includes('onnx') ? '真实模型 · ' + record.result.engine : '浏览器演示模式';
   q('resultDetails').innerHTML = `<div class="mobile-list"><div class="mobile-list-item"><span>模型置信度</span><b>${Math.round((record.result?.confidence || 0) * 1000) / 10}%</b></div><div class="mobile-list-item"><span>严重程度</span><span class="status ${esc(record.result?.severity)}">${severityNames[record.result?.severity] || record.result?.severity}</span></div><div class="mobile-list-item"><span>病斑/虫口指标</span><b>${ratio(record.result?.lesionRatio)}</b></div><div class="mobile-list-item"><span>图像质量</span><b>${record.result?.quality?.score || '—'}分</b></div></div><p>${esc(record.advice)}</p><p class="small muted">${esc(record.result?.explanation)}</p>`;
   q('resultDisclaimer').textContent = record.result?.disclaimer || '';
   const box = q('lesionBox');

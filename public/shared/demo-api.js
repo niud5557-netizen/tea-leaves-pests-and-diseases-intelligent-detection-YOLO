@@ -58,7 +58,7 @@
         supportedClasses,
         modelFile: 'models/tea_disease_pest.onnx',
         metricsFile: 'models/metrics.json',
-        notice: '浏览器静态演示模式可离线运行；本地后端可用时将自动切换到真实服务。'
+        notice: '当前为浏览器静态演示模式，可离线运行；本地部署后端（server.mjs）后会自动切换到真实模型与 ONNX 推理。'
       },
       fields: [
         { id: 'field-a01', garden: '信阳示范茶园', name: 'A-01 向阳坡', areaMu: 38, variety: '信阳群体种', owner: '示范合作社', risk: 'medium', lat: 32.125, lng: 114.067, lastPatrolAt: now() },
@@ -93,7 +93,7 @@
           needsReview: false,
           quality: { score: 93, accepted: true, issues: [], brightness: 128, sharpness: 210, width: 1024, height: 768 },
           explanation: '示范样本：健康叶片。',
-          disclaimer: '浏览器静态演示结果，仅用于展示界面和流程。'
+          disclaimer: '浏览器静态演示结果，仅用于展示界面与流程，不代表真实模型输出。'
         },
         advice: classMeta[0].advice,
         expertReview: null,
@@ -124,7 +124,7 @@
           needsReview: true,
           quality: { score: 82, accepted: true, issues: [], brightness: 116, sharpness: 182, width: 1024, height: 768 },
           explanation: '示范样本：病害复核流程。',
-          disclaimer: '浏览器静态演示结果，仅用于展示界面和流程。'
+          disclaimer: '浏览器静态演示结果，仅用于展示界面与流程，不代表真实模型输出。'
         },
         advice: classMeta[2].advice,
         expertReview: null,
@@ -155,7 +155,7 @@
           needsReview: false,
           quality: { score: 88, accepted: true, issues: [], brightness: 121, sharpness: 190, width: 1024, height: 768 },
           explanation: '示范样本：虫害处置流程。',
-          disclaimer: '浏览器静态演示结果，仅用于展示界面和流程。'
+          disclaimer: '浏览器静态演示结果，仅用于展示界面与流程，不代表真实模型输出。'
         },
         advice: classMeta[11].advice,
         expertReview: { expert: '示范农技专家', comment: '示范复核已完成', reviewedAt: now() },
@@ -386,8 +386,8 @@
         ? '图像质量或特征分布不足以可靠归类，建议重新拍摄或提交专家复核。'
         : category === 'health'
           ? '模型判断为健康叶片；仍建议结合地块历史和周边植株进行常规巡查。'
-          : '浏览器演示模式输出，可用于展示茶园病虫害智能识别流程。',
-      disclaimer: '当前为浏览器静态演示结果，不依赖后端服务；本地部署时会自动切换到真实 API。'
+          : '当前为浏览器演示模式输出，用于展示茶园病虫害智能识别与绿色防控流程。',
+      disclaimer: '当前为浏览器静态演示结果，不依赖后端服务；本地部署（server.mjs）后会自动切换到真实 API。'
     };
   }
 

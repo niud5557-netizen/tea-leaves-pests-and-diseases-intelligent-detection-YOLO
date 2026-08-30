@@ -36,9 +36,9 @@ async function load() {
   e('mFieldSelect').innerHTML = ms.fields.map(function (f) { return '<option value="' + f.id + '">' + f.garden + ' / ' + f.name + '</option>'; }).join('');
   e('mFieldList').innerHTML = ms.fields.map(function (f) { return '<div class="mobile-list-item"><div><b>' + f.name + '</b><div class="small muted">' + f.areaMu + '亩 · ' + f.variety + '</div></div><span class="status ' + f.risk + '">' + risk(f.risk) + '</span></div>'; }).join('');
   var latest = ms.records.slice(0, 4);
-  e('mRecent').innerHTML = latest.length ? latest.map(item).join('') : '<div class="empty">暂无记录</div>';
-  e('mHistory').innerHTML = ms.records.length ? ms.records.map(item).join('') : '<div class="empty">暂无记录</div>';
-  e('mTaskList').innerHTML = ms.tasks.length ? ms.tasks.map(function (t) { return '<div class="mobile-list-item"><div><b>' + t.title + '</b><div class="small muted">' + (t.field ? t.field.name : '') + ' · ' + fd(t.dueAt) + '</div></div><span class="status ' + t.status + '">' + (t.status === 'completed' ? '已完成' : '待复查') + '</span></div>'; }).join('') : '<div class="empty">暂无任务</div>';
+  e('mRecent').innerHTML = latest.length ? latest.map(item).join('') : '<div class="empty">暂无识别记录，点击「拍照识别」体验一下吧。</div>';
+  e('mHistory').innerHTML = ms.records.length ? ms.records.map(item).join('') : '<div class="empty">暂无巡查历史。</div>';
+  e('mTaskList').innerHTML = ms.tasks.length ? ms.tasks.map(function (t) { return '<div class="mobile-list-item"><div><b>' + t.title + '</b><div class="small muted">' + (t.field ? t.field.name : '') + ' · ' + fd(t.dueAt) + '</div></div><span class="status ' + t.status + '">' + (t.status === 'completed' ? '已完成' : '待复查') + '</span></div>'; }).join('') : '<div class="empty">暂无处置与复查任务。</div>';
 }
 
 function item(r) {

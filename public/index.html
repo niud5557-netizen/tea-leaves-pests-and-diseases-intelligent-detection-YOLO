@@ -3,46 +3,128 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>AI茶查查 · 公开演示</title>
+  <meta name="description" content="AI茶查查——面向中国国际大学生创新大赛的茶园病虫害智能识别与绿色防控演示系统，覆盖识别、复核、处置、复查全闭环。">
+  <title>AI茶查查｜茶园病虫害智能识别与绿色防控系统</title>
   <link rel="stylesheet" href="shared/styles.css">
   <style>
-    .landing{min-height:100vh;display:grid;place-items:center;padding:28px;background:radial-gradient(circle at 15% 10%,#dff6e7,transparent 35%),radial-gradient(circle at 85% 20%,#eaf7d7,transparent 30%),var(--cream)}
-    .landing-card{max-width:960px;width:100%;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:30px;box-shadow:var(--shadow);padding:42px}
-    .hero{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;align-items:center}
-    .hero h1{font-size:44px;line-height:1.05;margin:10px 0 14px;letter-spacing:-.04em}
-    .hero p{color:var(--muted);line-height:1.8}
-    .hero-mark{aspect-ratio:1;border-radius:32px;background:linear-gradient(135deg,#0e5f40,#83d39f);display:grid;place-items:center;color:white;font-size:88px;font-weight:900;box-shadow:0 24px 60px rgba(22,124,83,.24)}
-    .landing-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:26px}
-    .feature-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:28px}
-    .feature{background:#f8fcf9;border:1px solid var(--line);border-radius:18px;padding:16px}
-    .feature b{display:block;margin-bottom:6px}
-    @media(max-width:760px){.landing-card{padding:24px}.hero{grid-template-columns:1fr}.hero h1{font-size:34px}.feature-list{grid-template-columns:1fr}.hero-mark{display:none}}
+    body{background:#f7fbf8}
+    .shell{max-width:1180px;margin:0 auto;padding:26px 24px 64px}
+    .hero-card{position:relative;overflow:hidden;border-radius:30px;background:linear-gradient(145deg,#0b4f36,#1f8a5f 58%,#58b981);color:#fff;box-shadow:0 30px 80px rgba(11,79,54,.30);padding:58px 54px 52px}
+    .hero-card:before{content:"";position:absolute;right:-110px;top:-120px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.22),transparent 60%)}
+    .hero-card:after{content:"";position:absolute;right:60px;bottom:-150px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.16),transparent 62%)}
+    .hero-inner{position:relative;z-index:2;max-width:680px}
+    .hero-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.28);padding:7px 14px;border-radius:999px;font-size:13px;font-weight:700;letter-spacing:.02em;backdrop-filter:blur(4px)}
+    .hero-badge .dot8{width:7px;height:7px;border-radius:50%;background:#a8efc6;box-shadow:0 0 0 4px rgba(168,239,198,.28)}
+    .hero-title{font-size:50px;line-height:1.08;margin:20px 0 16px;letter-spacing:-.03em;font-weight:900}
+    .hero-title em{font-style:normal;color:#b6efcd}
+    .hero-inner p{font-size:18px;line-height:1.8;color:rgba(255,255,255,.9);max-width:600px;margin:0}
+    .hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px}
+    .hero-actions .btn{background:#fff;color:#0b4f36}
+    .hero-actions .btn:hover{background:#e8f7ef}
+    .hero-actions .btn.on-dark{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.35)}
+    .hero-actions .btn.on-dark:hover{background:rgba(255,255,255,.24)}
+    .hero-actions .btn.ghost-dark{background:transparent;color:#cdeeda;border:1px solid rgba(255,255,255,.28)}
+    .hero-actions .btn.ghost-dark:hover{background:rgba(255,255,255,.12);color:#fff}
+    .stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:30px;position:relative;z-index:2}
+    .stat{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:18px;padding:18px 18px;backdrop-filter:blur(3px)}
+    .stat b{font-size:30px;font-weight:900;display:block;letter-spacing:-.02em}
+    .stat span{font-size:13px;opacity:.9;margin-top:4px;display:block}
+    .section{margin-top:40px}
+    .section-head-row{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:22px}
+    .section-eyebrow{color:var(--green);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase}
+    .section-title{font-size:27px;font-weight:900;letter-spacing:-.02em;margin:8px 0 0}
+    .section-sub{color:var(--muted);font-size:15px;margin-top:8px;line-height:1.7}
+    .flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:0;background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px 20px;box-shadow:var(--shadow)}
+    .step{position:relative;text-align:center;padding:4px 8px}
+    .step:not(:last-child):after{content:"";position:absolute;right:-8px;top:26px;width:16px;height:2px;background:repeating-linear-gradient(90deg,var(--green-2) 0 4px,transparent 4px 8px)}
+    .step .ico{width:44px;height:44px;border-radius:14px;background:var(--mint);color:var(--green);display:grid;place-items:center;margin:0 auto 10px;font-size:20px}
+    .step b{font-size:14px;display:block;margin-bottom:5px}
+    .step span{font-size:11px;color:var(--muted);line-height:1.5;display:block}
+    .feature-list{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+    .feature{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px 20px;box-shadow:var(--shadow);transition:transform .2s ease,box-shadow .2s ease}
+    .feature:hover{transform:translateY(-3px);box-shadow:0 22px 52px rgba(23,53,42,.14)}
+    .feature .ico{width:40px;height:40px;border-radius:12px;background:var(--mint);color:var(--green);display:grid;place-items:center;font-size:19px;margin-bottom:14px}
+    .feature b{font-size:16px;display:block;margin-bottom:8px}
+    .feature p{font-size:13px;color:var(--muted);line-height:1.7;margin:0}
+    .frontier{display:flex;gap:18px;align-items:flex-start;background:linear-gradient(145deg,#f2faf5,#e6f5ec);border:1px solid var(--line);border-radius:20px;padding:22px 24px}
+    .frontier .ico{width:42px;height:42px;border-radius:12px;background:#fff;color:var(--green);display:grid;place-items:center;font-size:20px;flex:none;box-shadow:var(--shadow)}
+    .frontier b{font-size:16px;display:block;margin-bottom:6px}
+    .frontier p{font-size:13px;color:var(--muted);line-height:1.75;margin:0}
+    .page-footer{margin-top:40px;text-align:center;color:var(--muted);font-size:12px;line-height:1.8}
+    .chip{display:inline-block;background:var(--mint);color:var(--green);border-radius:999px;padding:5px 11px;font-size:12px;font-weight:700}
+    @media(max-width:960px){.flow{grid-template-columns:repeat(3,minmax(0,1fr))}.step:nth-child(3):after{display:none}.step:nth-child(6):after{display:none}.feature-list{grid-template-columns:1fr 1fr}}
+    @media(max-width:640px){.hero-card{padding:38px 26px}.hero-title{font-size:36px}.stat-strip{grid-template-columns:1fr 1fr}.flow{grid-template-columns:1fr 1fr}.step:nth-child(2):after,.step:nth-child(4):after{display:none}.feature-list{grid-template-columns:1fr}.hero-actions .btn{width:100%}.section-head-row{flex-direction:column;align-items:flex-start}}
   </style>
 </head>
 <body>
-  <main class="landing">
-    <section class="landing-card">
-      <div class="hero">
-        <div>
-          <div class="eyebrow">AI Tea Check Public Demo</div>
-          <h1>AI茶查查｜茶园病虫害智能识别与绿色防控系统</h1>
-          <p>这是面向中国国际大学生创新大赛的公开演示版。无需服务器即可体验 PC 管理端、移动网页端、病虫害识别、专家复核、处置复查和模型证据链。</p>
-          <div class="landing-actions">
-            <a class="btn" href="manager/">进入 PC 管理端</a>
-            <a class="btn secondary" href="mobile/">进入移动网页端</a>
-            <a class="btn ghost" href="https://github.com/niud5557-netizen/tea-leaves-pests-and-diseases-intelligent-detection-YOLO">查看 GitHub 源码</a>
-          </div>
+  <div class="shell">
+    <section class="hero-card">
+      <div class="hero-inner">
+        <div class="hero-badge"><span class="dot8"></span>中国国际大学生创新大赛 · 参赛演示</div>
+        <h1 class="hero-title">AI茶查查<em>｜</em>茶园病虫害<br>智能识别与绿色防控系统</h1>
+        <p>面向茶园一线的 AI 早筛与绿色生产助手。基于图像分类模型，打通「拍照上传 → 智能识别 → 专家复核 → 绿色处置 → 复查闭环 → 数据回流」全流程，帮助茶农与农技员及时、科学地应对病虫害。</p>
+        <div class="hero-actions">
+          <a class="btn" href="manager/">进入 PC 管理中心</a>
+          <a class="btn on-dark" href="mobile/">进入移动巡园端</a>
+          <a class="btn ghost-dark" href="https://github.com/niud5557-netizen/tea-leaves-pests-and-diseases-intelligent-detection-YOLO">查看 GitHub 源码</a>
         </div>
-        <div class="hero-mark">茶</div>
+      </div>
+      <div class="stat-strip">
+        <div class="stat"><b>13</b><span>健康/病害/虫害识别类别</span></div>
+        <div class="stat"><b>1430</b><span>清洗后有效训练样本</span></div>
+        <div class="stat"><b>80.6%</b><span>公开+本地数据集初筛基线</span></div>
+        <div class="stat"><b>三端</b><span>管理端 / 移动端 / 小程序</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head-row">
+        <div>
+          <div class="section-eyebrow">Closed-loop Workflow</div>
+          <h2 class="section-title">一次识别，全链路留痕</h2>
+          <p class="section-sub">从拍到图片的那一刻起，系统自动走完识别、复核、处置与复查，每一步都可追溯、可复盘。</p>
+        </div>
+      </div>
+      <div class="flow">
+        <div class="step"><div class="ico">📷</div><b>拍照上传</b><span>地块、备注与图片一并登记</span></div>
+        <div class="step"><div class="ico">🔍</div><b>智能识别</b><span>模型输出类别、占比与置信度</span></div>
+        <div class="step"><div class="ico">👨‍🔬</div><b>专家复核</b><span>低置信度样本转入人工闭环</span></div>
+        <div class="step"><div class="ico">🌱</div><b>绿色处置</b><span>生成责任人、措施与截止期限</span></div>
+        <div class="step"><div class="ico">🔄</div><b>复查闭环</b><span>到期复查，记录成效与改进</span></div>
+        <div class="step"><div class="ico">🧾</div><b>数据回流</b><span>积累样本，持续优化模型</span></div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-head-row">
+        <div>
+          <div class="section-eyebrow">Core Capabilities</div>
+          <h2 class="section-title">四大核心能力</h2>
+          <p class="section-sub">围绕「可用、可信、可追、可训」四个关键词，把 AI 落到茶园一线。</p>
+        </div>
       </div>
       <div class="feature-list">
-        <div class="feature"><b>病虫害早筛</b><span class="small muted">浏览器静态演示，可上传图片体验流程。</span></div>
-        <div class="feature"><b>专家复核</b><span class="small muted">低置信度样本进入人工复核闭环。</span></div>
-        <div class="feature"><b>处置复查</b><span class="small muted">生成责任人、措施、期限与完成记录。</span></div>
-        <div class="feature"><b>模型证据</b><span class="small muted">展示类别、数据、指标和能力边界。</span></div>
+        <div class="feature"><div class="ico">◎</div><b>病虫害早筛</b><p>浏览器静态演示即可上传图片体验识别流程，图片质量门控优先拦截模糊、过暗样本。</p></div>
+        <div class="feature"><div class="ico">✓</div><b>专家复核</b><p>低置信度、未知症状自动转入人工复核队列，避免未经审核直接作出处置决策。</p></div>
+        <div class="feature"><div class="ico">◷</div><b>处置复查</b><p>把结论转成责任人、防控措施与截止期限，到期生成复查任务，形成治理闭环。</p></div>
+        <div class="feature"><div class="ico">◇</div><b>模型证据链</b><p>展示支持类别、数据来源、指标与能力边界，明确模型适用场景，避免过度承诺。</p></div>
       </div>
-      <p class="footer-note">公开页为免费静态部署版本，数据保存在访问者浏览器本地；本地运行 `server.mjs` 时可使用完整 Node/Python 后端和 ONNX 推理。</p>
     </section>
-  </main>
+
+    <section class="section">
+      <div class="frontier">
+        <div class="ico">🧭</div>
+        <div>
+          <b>模型能力边界说明</b>
+          <p>当前版本为<strong>图像分类模型</strong>（MobileNetV3-Small 初筛基线），用于判断病害/虫害/健康类别，而非虫体检测或病斑分割模型；页面中出现的疑似区域框与严重度为辅助决策展示。国赛答辩建议将指标表述为「公开 + 本地数据集初筛基线」，田间生产指标仍需外部茶园盲测与专家签字样本进一步验证。</p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <p><span class="chip">AI茶查查 · 静态演示版</span></p>
+      <p>公开页为免费静态部署版本，数据保存在访问者浏览器本地；本地运行 <code>server.mjs</code> 时可使用完整 Node/Python 后端与 ONNX 推理。<br>本项目仅用于教学与竞赛演示，不构成农业用药建议。</p>
+    </footer>
+  </div>
 </body>
 </html>
