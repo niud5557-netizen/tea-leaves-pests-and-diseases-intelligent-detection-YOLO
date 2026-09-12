@@ -19,6 +19,21 @@ LOCAL_CLASS_MAP = {
     'red leaf spot': 'red_leaf_spot',
     'white spot': 'white_spot',
 }
+NEGATIVE_GROUP_MAP = {
+    'healthy_leaf': 'healthy_leaf',
+    'healthy_leaves': 'healthy_leaf',
+    '健康叶片': 'healthy_leaf',
+    'weeds': 'weeds',
+    'weed': 'weeds',
+    '杂草': 'weeds',
+    'soil': 'soil',
+    'dirt': 'soil',
+    '泥土': 'soil',
+    'non_tea': 'non_tea',
+    'non-tea': 'non_tea',
+    'other_plants': 'non_tea',
+    '非茶叶植物': 'non_tea',
+}
 PEST_PREFIX_MAP = {
     'LeafBeetle': 'leaf_beetle',
     'Mirid': 'apolygus_lucorum',
@@ -38,7 +53,7 @@ PEST_LABEL_MAP = {
 CLASS_NAMES = [
     'healthy', 'algal_leaf', 'anthracnose', 'bird_eye_spot', 'brown_blight', 'gray_blight',
     'red_leaf_spot', 'white_spot', 'tea_white_scab', 'tea_blister_blight',
-    'tea_blister_blight_perforation', 'leaf_beetle', 'apolygus_lucorum'
+    'tea_blister_blight_perforation', 'leaf_beetle', 'apolygus_lucorum', 'unknown'
 ]
 DISPLAY_NAMES = {
     'healthy': '健康叶片',
@@ -54,6 +69,7 @@ DISPLAY_NAMES = {
     'tea_blister_blight_perforation': '茶饼病穿孔期',
     'leaf_beetle': '叶甲类虫害',
     'apolygus_lucorum': '绿盲蝽类虫害',
+    'unknown': '非茶叶/未知图像',
 }
 
 
@@ -91,7 +107,34 @@ def class_from_pest_file(image_path: Path, label_dir: Path) -> str | None:
     return counts.most_common(1)[0][0] if counts else None
 
 
-def collect_samples(source_root: Path, include_augmented_train: bool):
+def collect_negative_samples(negative_source: Path, max_per_group: int, seed: int):
+    samples = []
+    rejected = []
+    if not negative_source.exists():
+        raise SystemExit(f'负样本目录不存在: {negative_source}')
+    randomizer = random.Random(seed)
+    folders = [folder for folder in negative_source.iterdir() if folder.is_dir()]
+    if not folders:
+        folders = [negative_source]
+    for folder in folders:
+        group = NEGATIVE_GROUP_MAP.get(folder.name, folder.name)
+        paths = [path for path in folder.rglob('*') if path.is_file() and path.suffix.lower() in IMAGE_EXTS]
+        randomizer.shuffle(paths)
+        if max_per_group > 0:
+            paths = paths[:max_per_group]
+        for path in paths:
+            samples.append({
+                'path': path,
+                'class_code': 'unknown',
+                'source': 'negative_samples',
+                'negative_group': group,
+            })
+    if not samples:
+        rejected.append({'path': str(negative_source), 'reason': '负样本目录中没有可读取图片'})
+    return samples, rejected
+
+
+def collect_samples(source_root: Path, include_augmented_train: bool, negative_source: Path | None, negative_max_per_group: int, seed: int):
     samples = []
     rejected = []
     for folder_name, class_code in LOCAL_CLASS_MAP.items():
@@ -117,6 +160,10 @@ def collect_samples(source_root: Path, include_augmented_train: bool):
                 samples.append({'path': path, 'class_code': class_code, 'source': source_name})
             else:
                 rejected.append({'path': str(path), 'reason': '无法从文件名或YOLO标签推断类别'})
+    if negative_source:
+        negative_samples, negative_rejected = collect_negative_samples(negative_source, negative_max_per_group, seed)
+        samples.extend(negative_samples)
+        rejected.extend(negative_rejected)
     return samples, rejected
 
 
@@ -167,6 +214,8 @@ def main():
     parser.add_argument('--image-size', type=int, default=256)
     parser.add_argument('--seed', type=int, default=20260814)
     parser.add_argument('--include-augmented-train', action='store_true', help='只把外部增强集train作为训练补充；默认关闭以避免泄漏争议')
+    parser.add_argument('--negative-source', default=None, help='负样本根目录，建议包含 healthy_leaf/weeds/soil/non_tea 四个子目录')
+    parser.add_argument('--negative-max-per-group', type=int, default=500, help='每个负样本来源组最多保留多少张，0表示不限制')
     parser.add_argument('--train-ratio', type=float, default=0.72)
     parser.add_argument('--val-ratio', type=float, default=0.14)
     args = parser.parse_args()
@@ -179,7 +228,8 @@ def main():
         shutil.rmtree(output_dir)
     (output_dir / 'reports').mkdir(parents=True, exist_ok=True)
 
-    raw_samples, rejected = collect_samples(source_root, args.include_augmented_train)
+    negative_source = Path(args.negative_source) if args.negative_source else None
+    raw_samples, rejected = collect_samples(source_root, args.include_augmented_train, negative_source, args.negative_max_per_group, args.seed)
     hash_index = {}
     conflicts = []
     clean_samples = []
@@ -209,6 +259,7 @@ def main():
             'class_code': sample['class_code'],
             'display_name': DISPLAY_NAMES.get(sample['class_code'], sample['class_code']),
             'source': sample['source'],
+            'negative_group': sample.get('negative_group', ''),
             'sha256': sample['sha256'],
             'width': sample['width'],
             'height': sample['height'],
@@ -235,7 +286,9 @@ def main():
             'dedupe': 'sha256 exact duplicate removal',
             'split': f"stratified random by class, seed={args.seed}",
             'augmented_train_used': bool(args.include_augmented_train),
-            'warning': '外部增强集默认不进入测试集；病斑分割/虫体检测需框级指标另行评估。',
+            'negative_source': str(negative_source) if negative_source else None,
+            'negative_max_per_group': args.negative_max_per_group,
+            'warning': '外部增强集默认不进入测试集；病斑分割/虫体检测需框级指标另行评估。unknown 仅表示拒识/非茶叶，不是一个病害类别。',
         },
         'classes': [{'code': code, 'name': DISPLAY_NAMES[code]} for code in CLASS_NAMES],
         'raw_images_seen': len(raw_samples),

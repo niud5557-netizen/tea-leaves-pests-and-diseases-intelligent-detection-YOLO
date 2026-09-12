@@ -170,17 +170,69 @@
     return base;
   }
 
+  let databaseCache = null;
+
+  function indexedDatabaseRead() {
+    if (!window.indexedDB) return Promise.resolve(null);
+    return new Promise((resolve) => {
+      const request = indexedDB.open('aiTeaCheck', 1);
+      request.onupgradeneeded = () => request.result.createObjectStore('state');
+      request.onerror = () => resolve(null);
+      request.onsuccess = () => {
+        const transaction = request.result.transaction('state', 'readonly');
+        const read = transaction.objectStore('state').get('database');
+        read.onerror = () => resolve(null);
+        read.onsuccess = () => resolve(read.result || null);
+      };
+    });
+  }
+
+  function indexedDatabaseWrite(database) {
+    if (!window.indexedDB) return Promise.resolve();
+    return new Promise((resolve) => {
+      const request = indexedDB.open('aiTeaCheck', 1);
+      request.onupgradeneeded = () => request.result.createObjectStore('state');
+      request.onerror = () => resolve();
+      request.onsuccess = () => {
+        const transaction = request.result.transaction('state', 'readwrite');
+        transaction.objectStore('state').put(database, 'database');
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = () => resolve();
+      };
+    });
+  }
+
+  async function hydrateDatabase() {
+    const indexed = await indexedDatabaseRead();
+    let parsed = indexed;
+    if (!parsed) {
+      try {
+        const stored = localStorage.getItem(storageKey);
+        parsed = stored ? JSON.parse(stored) : null;
+      } catch {}
+    }
+    databaseCache = parsed ? Object.assign(defaultDatabase(), parsed) : defaultDatabase();
+    if (!parsed) await indexedDatabaseWrite(databaseCache);
+    return databaseCache;
+  }
+
+  const databaseReady = hydrateDatabase();
+
   function loadDatabase() {
+    if (databaseCache) return databaseCache;
     try {
       const stored = localStorage.getItem(storageKey);
       if (!stored) {
         const initial = defaultDatabase();
+        databaseCache = initial;
         localStorage.setItem(storageKey, JSON.stringify(initial));
         return initial;
       }
-      return Object.assign(defaultDatabase(), JSON.parse(stored));
+      databaseCache = Object.assign(defaultDatabase(), JSON.parse(stored));
+      return databaseCache;
     } catch {
       const initial = defaultDatabase();
+      databaseCache = initial;
       try { localStorage.setItem(storageKey, JSON.stringify(initial)); } catch {}
       return initial;
     }
@@ -189,7 +241,9 @@
   function saveDatabase(database) {
     database.meta ||= { schemaVersion: 2, createdAt: now(), updatedAt: now() };
     database.meta.updatedAt = now();
+    databaseCache = database;
     try { localStorage.setItem(storageKey, JSON.stringify(database)); } catch {}
+    indexedDatabaseWrite(database);
     return database;
   }
 
@@ -350,26 +404,10 @@
   }
 
   async function demoPrediction(file, originalName, quality) {
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    const hash = await digestBytes(bytes);
-    let classCode = detectHint(originalName) || null;
-    if (!classCode) {
-      if (quality.score < 48) classCode = 'unknown';
-      else if (quality.greenDominance > 1.32) classCode = 'healthy';
-      else classCode = supportedClasses[hash[0] % supportedClasses.length];
-    }
-    classCode = normalizeClassCode(classCode);
-    const confidence = classCode === 'unknown' ? 0.42 : Number(Math.max(0.35, Math.min(0.97, 0.67 + (hash[1] / 255) * 0.27 + Math.min(0.04, quality.score / 2500))).toFixed(4));
-    const category = classCode === 'healthy' ? 'health' : ['leaf_beetle', 'apolygus_lucorum'].includes(classCode) ? 'pest' : classCode === 'unknown' ? 'unknown' : 'disease';
-    const lesionRatio = category === 'health' ? 0 : category === 'unknown' ? null : Number(Math.max(0.01, Math.min(0.26, 0.018 + (1 - confidence) * 0.16 + (hash[2] / 255) * 0.035)).toFixed(4));
-    const severity = category === 'unknown' ? 'review' : severityFromRatio(lesionRatio || 0, category);
-    const lesionBox = category === 'health' || category === 'unknown' ? null : {
-      x: Number((18 + (hash[3] / 255) * 22).toFixed(1)),
-      y: Number((16 + (hash[4] / 255) * 25).toFixed(1)),
-      width: Number((28 + (hash[5] / 255) * 20).toFixed(1)),
-      height: Number((24 + (hash[6] / 255) * 23).toFixed(1))
-    };
-    const needsReview = category === 'unknown' || confidence < 0.72 || quality.score < 55;
+    const classCode = 'unknown';
+    const confidence = 0.42;
+    const category = 'unknown';
+    const needsReview = true;
     return {
       engine: 'demo-browser',
       modelReady: false,
@@ -377,21 +415,18 @@
       category,
       confidence,
       topK: [{ classCode, confidence }],
-      lesionRatio,
-      severity,
-      lesionBox,
+      lesionRatio: null,
+      severity: 'review',
+      lesionBox: null,
       needsReview,
       quality,
-      explanation: category === 'unknown'
-        ? '图像质量或特征分布不足以可靠归类，建议重新拍摄或提交专家复核。'
-        : category === 'health'
-          ? '模型判断为健康叶片；仍建议结合地块历史和周边植株进行常规巡查。'
-          : '浏览器演示模式输出，可用于展示茶园病虫害智能识别流程。',
+      explanation: '浏览器静态演示不加载模型，上传图片统一进入专家复核。',
       disclaimer: '当前为浏览器静态演示结果，不依赖后端服务；本地部署时会自动切换到真实 API。'
     };
   }
 
-  function localRequest(url, options) {
+  async function localRequest(url, options) {
+    await databaseReady;
     const method = (options?.method || 'GET').toUpperCase();
     const database = loadDatabase();
     const parsedUrl = new URL(url, window.location.origin);

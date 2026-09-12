@@ -1,0 +1,146 @@
+{
+  "version": "1.0.0",
+  "disclaimer": "治理建议仅供初步参考。涉及用药时必须遵守当地登记范围、标签剂量和安全间隔；大面积或快速扩散的病虫害请咨询农技人员。",
+  "items": [
+    {
+      "code": "healthy",
+      "name": "健康叶片",
+      "category": "health",
+      "symptoms": "叶色和叶形基本正常，未见典型病斑、虫体或异常取食痕。",
+      "conditions": "保持通风透光、合理灌溉和均衡施肥，持续观察新梢和叶背。",
+      "agriculturalControl": "保留健康样本作为对照，定期巡园并清除明显枯叶、落叶。",
+      "chemicalControl": "无需施用药剂。",
+      "precautions": "不要因为一次识别结果正常就停止巡查。"
+    },
+    {
+      "code": "algal_leaf",
+      "name": "藻斑病",
+      "category": "disease",
+      "symptoms": "叶面可见黄褐色至橙红色绒状或毡状斑，湿度高时表面特征更明显。",
+      "conditions": "高温高湿、林冠郁闭、通风透光不足和叶面长时间潮湿。",
+      "agriculturalControl": "修剪过密枝叶，改善通风透光，清除重病叶并减少叶面长时间积水。",
+      "chemicalControl": "可在农技人员确认后，按当地登记标签选用铜制剂等保护性药剂。",
+      "precautions": "铜制剂不可超量或频繁混用，采收前安全间隔以产品标签为准。"
+    },
+    {
+      "code": "anthracnose",
+      "name": "茶炭疽病",
+      "category": "disease",
+      "symptoms": "叶片出现圆形或不规则褐色病斑，后期中央变灰白并可见深色小点。",
+      "conditions": "高温多雨、湿度大、排水不良和枝叶过密时更易发生。",
+      "agriculturalControl": "及时清除病叶，改善排水和通风，避免偏施氮肥并减少机械损伤。",
+      "chemicalControl": "确认后可按当地登记范围选择代森锰锌、咪鲜胺或其他登记药剂，严格按标签使用。",
+      "precautions": "不同作用机制药剂轮换使用，禁止超范围、超剂量或临近采收违规用药。"
+    },
+    {
+      "code": "bird_eye_spot",
+      "name": "鸟眼斑",
+      "category": "disease",
+      "symptoms": "叶片出现褐色至灰白色圆斑，常有明显边缘，部分病斑中心颜色较浅。",
+      "conditions": "湿度高、叶面结露时间长、茶园郁闭和病残体较多。",
+      "agriculturalControl": "剪除重病枝叶，清理落叶，降低郁闭度并加强雨后巡查。",
+      "chemicalControl": "由农技人员确认后，按登记标签选择保护性杀菌剂并进行局部防治。",
+      "precautions": "需排除炭疽病、机械伤和虫害取食造成的相似斑痕。"
+    },
+    {
+      "code": "brown_blight",
+      "name": "褐斑病",
+      "category": "disease",
+      "symptoms": "叶片出现褐色或深褐色斑块，严重时病斑扩大并导致叶片早落。",
+      "conditions": "高湿、排水不畅、树势弱和田间卫生状况差。",
+      "agriculturalControl": "清除病叶和病残体，改善排水通风，合理施肥并减少过度荫蔽。",
+      "chemicalControl": "经确认后按当地登记标签选用保护性或内吸性杀菌剂，注意轮换作用机制。",
+      "precautions": "药剂方案应根据病害阶段和采摘期调整，不建议仅凭图片自行用药。"
+    },
+    {
+      "code": "gray_blight",
+      "name": "灰斑病",
+      "category": "disease",
+      "symptoms": "病斑中心呈灰白或灰褐色，边缘较深，后期可能出现穿孔或叶片坏死。",
+      "conditions": "连续阴雨、湿度较大、枝叶重叠和植株长势弱。",
+      "agriculturalControl": "加强修剪和排水，及时清除病叶，减少田间病残体积累。",
+      "chemicalControl": "确认后可按标签使用当地登记的保护性杀菌剂，必要时由农技人员制定轮换方案。",
+      "precautions": "叶片穿孔也可能由虫害或机械损伤引起，应结合叶背和田间情况判断。"
+    },
+    {
+      "code": "red_leaf_spot",
+      "name": "红叶斑",
+      "category": "disease",
+      "symptoms": "叶片出现红褐色至紫红色斑点或斑块，大小和边界受叶龄与环境影响。",
+      "conditions": "营养失衡、强光日灼、湿度变化或病原侵染均可能形成相似症状。",
+      "agriculturalControl": "补拍叶片正反面，检查根系和土壤水分，改善树势并清除明确病叶。",
+      "chemicalControl": "先由农技人员排除日灼和营养障碍，确认病原后再按登记标签选择药剂。",
+      "precautions": "红色斑点不是单一病害的充分证据，禁止仅凭颜色直接用药。"
+    },
+    {
+      "code": "white_spot",
+      "name": "白斑病",
+      "category": "disease",
+      "symptoms": "叶面出现浅白、灰白或近圆形斑点，部分病斑边缘可见褐色轮廓。",
+      "conditions": "湿度较高、通风不良、叶面持续潮湿和植株抗性下降。",
+      "agriculturalControl": "检查叶背和相邻叶片，改善通风，清除重病叶并加强田间卫生。",
+      "chemicalControl": "确认病原后按当地登记标签选用相应杀菌剂，不与无关药剂盲目混配。",
+      "precautions": "需与白粉、介壳虫分泌物、药害和机械擦伤鉴别。"
+    },
+    {
+      "code": "tea_white_scab",
+      "name": "茶白星病/白痂症状",
+      "category": "disease",
+      "symptoms": "嫩叶或叶面出现灰白色、白色痂状或星点状病斑，严重时影响叶片展开。",
+      "conditions": "低温高湿、嫩梢集中生长、叶面结露和茶园郁闭。",
+      "agriculturalControl": "清除重病嫩梢和病叶，降低湿度，改善通风并减少过量氮肥。",
+      "chemicalControl": "经农技人员确认后按登记标签选择相应杀菌剂，严格遵守采摘间隔。",
+      "precautions": "白色症状容易与虫体、药害和粉尘混淆，应补拍近景及叶背。"
+    },
+    {
+      "code": "tea_blister_blight",
+      "name": "茶饼病",
+      "category": "disease",
+      "symptoms": "嫩叶、嫩梢出现淡黄或浅褐色隆起斑，病斑可逐渐扩大并形成饼状。",
+      "conditions": "低温高湿、连续阴雨、嫩梢多和叶面长时间有水膜。",
+      "agriculturalControl": "加强通风透光，清除重病嫩梢，合理控制氮肥并减少叶面结露。",
+      "chemicalControl": "发生初期在农技人员指导下按标签使用当地登记的杀菌剂，并进行作用机制轮换。",
+      "precautions": "不要把穿孔后期与其他叶斑病混用方案，采茶期必须核对安全间隔。"
+    },
+    {
+      "code": "tea_blister_blight_perforation",
+      "name": "茶饼病穿孔期",
+      "category": "disease",
+      "symptoms": "茶饼病病斑后期组织坏死脱落，叶片形成穿孔或破裂，常伴褐色边缘。",
+      "conditions": "病斑发展时间较长、湿度持续偏高和嫩叶受侵染。",
+      "agriculturalControl": "及时摘除重病叶和病梢，清理落叶，改善通风并记录扩散范围。",
+      "chemicalControl": "由农技人员确认是否仍有活动性病斑，再按登记标签选择药剂；已形成的孔洞不能靠药剂恢复。",
+      "precautions": "同时检查虫害取食和机械损伤，避免将所有穿孔都判断为茶饼病。"
+    },
+    {
+      "code": "leaf_beetle",
+      "name": "叶甲类虫害",
+      "category": "pest",
+      "symptoms": "叶缘或叶面出现缺刻、孔洞和啃食痕，严重时只剩叶脉，可能发现成虫或幼虫。",
+      "conditions": "温暖干燥、杂草较多、成虫迁入和新梢嫩叶集中发生时风险上升。",
+      "agriculturalControl": "清除茶园及边缘杂草，人工捕捉成虫，设置诱捕设施并监测虫口密度。",
+      "chemicalControl": "达到当地防治指标后，由农技人员按登记标签选择相应杀虫剂，严格执行安全间隔。",
+      "precautions": "先确认虫体和虫口密度，避免对低密度或非目标昆虫进行无必要施药。"
+    },
+    {
+      "code": "apolygus_lucorum",
+      "name": "绿盲蝽类虫害",
+      "category": "pest",
+      "symptoms": "嫩梢和幼叶出现皱缩、畸形、褐色刺吸斑或生长点坏死，叶片可能残缺。",
+      "conditions": "温暖湿润、嫩梢旺盛、周边杂草多和成虫迁入时易发生。",
+      "agriculturalControl": "清除田边杂草，重点检查嫩梢和叶背，结合诱捕和分区监测控制虫口。",
+      "chemicalControl": "达到防治指标后按当地登记标签选择杀虫剂，注意保护授粉昆虫和天敌。",
+      "precautions": "刺吸症状与冻害、药害和营养失调相似，需同时拍摄虫体或嫩梢近景。"
+    },
+    {
+      "code": "unknown",
+      "name": "疑似未知症状",
+      "category": "unknown",
+      "symptoms": "当前模型无法可靠归类，不能据此确认具体病虫害。",
+      "conditions": "图片质量不足、非茶叶图像、症状超出训练类别或多个症状重叠。",
+      "agriculturalControl": "补拍整株、叶片正面、叶背、嫩梢和周边环境，记录地点、天气和发生范围。",
+      "chemicalControl": "不建议在未确认病虫害前自行施药。",
+      "precautions": "请提交农技人员复核；大面积扩散或快速萎蔫时应立即现场处置。"
+    }
+  ]
+}

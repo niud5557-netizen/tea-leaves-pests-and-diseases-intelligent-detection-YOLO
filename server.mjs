@@ -9,6 +9,7 @@ import { createId, loadDatabase, mutateDatabase } from './lib/store.mjs';
 
 const root = path.dirname(fileURLToPath(import.meta.url));
 const uploadDirectory = path.join(root, 'data', 'uploads');
+const plantKnowledgePath = path.join(root, 'public', 'shared', 'plant-protection-knowledge.json');
 await fs.mkdir(uploadDirectory, { recursive: true });
 const port = Number(process.env.PORT || 8080);
 const host = process.env.HOST || '0.0.0.0';
@@ -79,6 +80,15 @@ function dashboard(database) {
   };
 }
 
+async function loadPlantProtectionKnowledge() {
+  try {
+    const data = JSON.parse(await fs.readFile(plantKnowledgePath, 'utf8'));
+    return Array.isArray(data) ? data : data.items || [];
+  } catch {
+    return [];
+  }
+}
+
 app.get('/', (_request, response) => response.redirect('/manager/'));
 app.get('/api/health', async (_request, response) => {
   const database = await loadDatabase();
@@ -86,7 +96,21 @@ app.get('/api/health', async (_request, response) => {
 });
 app.get('/api/dashboard', async (_request, response) => response.json(dashboard(await loadDatabase())));
 app.get('/api/model', async (_request, response) => response.json((await loadDatabase()).model));
-app.get('/api/knowledge', async (_request, response) => response.json((await loadDatabase()).knowledge));
+app.get('/api/knowledge', async (_request, response) => {
+  const database = await loadDatabase();
+  const merged = new Map(database.knowledge.map((item) => [item.code, item]));
+  for (const item of await loadPlantProtectionKnowledge()) {
+    const current = merged.get(item.code) || {};
+    merged.set(item.code, {
+      ...current,
+      ...item,
+      agriculturalControl: item.agriculturalControl || item.agricultural_control,
+      chemicalControl: item.chemicalControl || item.chemical_control,
+      precautions: item.precautions || item.notes
+    });
+  }
+  response.json([...merged.values()]);
+});
 
 app.get('/api/fields', async (_request, response) => response.json((await loadDatabase()).fields));
 app.post('/api/fields', async (request, response) => {

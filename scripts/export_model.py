@@ -37,7 +37,18 @@ def main():
         dynamic_axes={'images': {0: 'batch'}, 'logits': {0: 'batch'}},
         opset_version=17,
     )
-    metadata = {'onnx': str(output), 'class_names': classes, 'image_size': image_size, 'checkpoint': str(Path(args.checkpoint)), 'model_family': 'MobileNetV3-Small'}
+    metadata = {
+        'onnx': str(output),
+        'class_names': classes,
+        'image_size': image_size,
+        'checkpoint': str(Path(args.checkpoint)),
+        'model_family': 'MobileNetV3-Small',
+        'operating_point': checkpoint.get('operating_point', {
+            'confidence_threshold': 0.45,
+            'margin_threshold': checkpoint.get('reject_margin', 0.08),
+            'calibrated': False,
+        }),
+    }
     (output.parent / 'model_metadata.json').write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding='utf-8')
     print(json.dumps(metadata, ensure_ascii=False, indent=2))
 

@@ -2,7 +2,7 @@
 
 ## 目录位置
 
-最终项目目录：C:\Users\刁金生\Desktop\tea test
+最终项目目录：C:\Users\刁金生\Desktop\tea\tea test
 
 ## 环境要求
 
@@ -14,22 +14,22 @@
 ## 一键部署
 
 `powershell
-cd "C:\Users\刁金生\Desktop\tea test"
+cd "C:\Users\刁金生\Desktop\tea\tea test"
 powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
 `
 
 默认环境变量：
 
 - PORT=8080
-- HOST=127.0.0.1
+- HOST=0.0.0.0（真机调试需要监听局域网）
 - ANALYZER_MODE=model
 - PYTHON_PATH=.venv\Scripts\python.exe
 
 ## 验证命令
 
 `powershell
-cd "C:\Users\刁金生\Desktop\tea test"
-C:\Users\刁金生\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin\node.exe .\scripts\verify.mjs
+cd "C:\Users\刁金生\Desktop\tea\tea test"
+node .\scripts\verify.mjs
 `
 
 验证内容：
@@ -48,8 +48,9 @@ C:\Users\刁金生\.cache\codex-runtimes\codex-primary-runtime\dependencies\node
 
 1. 打开微信开发者工具。
 2. 选择导入项目，目录选择：C:\Users\刁金生\Desktop\tea test\miniprogram。
-3. 开发调试阶段可保持 urlCheck:false。
-4. 若部署到公网，需要把 miniprogram/utils/api.js 中的 BASE_URL 改成 HTTPS 后端域名，并在微信公众平台配置合法请求域名。
+3. 真机调试时，把 `miniprogram/app.js` 的 `globalData.baseUrl` 设置为电脑当前 Wi-Fi IPv4 地址，例如 `http://10.245.179.101:8080`；手机和电脑必须连接同一局域网。
+4. 开发者工具和真机调试阶段关闭合法域名校验；若电脑防火墙拦截 8080 端口，需要允许 Node.js 通过专用网络。
+5. 若部署到公网，需要把 `miniprogram/app.js` 的 `baseUrl` 改成 HTTPS 后端域名，并在微信公众平台配置合法请求域名。
 
 ## 生产化建议
 

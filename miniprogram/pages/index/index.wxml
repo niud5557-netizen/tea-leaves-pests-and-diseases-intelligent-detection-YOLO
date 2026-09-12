@@ -1,1 +1,51 @@
-<view class="page"><view class="hero"><view class="title">AI茶查查</view><view class="sub">丘陵茶园病虫害早筛与绿色防控辅助系统</view><view class="grid" style="margin-top:28rpx"><view><view class="title">{{dashboard.records}}</view><view class="sub">识别记录</view></view><view><view class="title">{{dashboard.reviews}}</view><view class="sub">待专家复核</view></view></view></view><view class="card"><view class="grid"><view class="action primary" bindtap="goCapture">📷 拍照识别</view><view class="action" bindtap="goHistory">▤ 历史记录</view><view class="action" bindtap="goTasks">◷ 处置复查</view><view class="action" bindtap="goFields">⌖ 茶园地块</view></view></view><view class="card"><view class="name">最近巡查</view><block wx:if="{{latest.length}}"><view class="record" wx:for="{{latest}}" wx:key="id"><image class="thumb" src="{{item.imageUrl}}" mode="aspectFill"/><view class="grow"><view class="name">{{item.diseaseName}}</view><view class="muted">{{item.field.name}}</view><view class="tag">{{item.status}}</view></view></view></block><view class="empty" wx:else>暂无识别记录</view></view></view>
+<view class="page">
+  <view class="hero">
+    <view class="title">AI茶查查</view>
+    <view class="sub">丘陵茶园病虫害早筛与绿色防控辅助系统</view>
+    <view class="stats">
+      <view class="stat" bindtap="goHistory"><view class="stat-number">{{dashboard.records}}</view><view>识别记录</view></view>
+      <view class="stat" bindtap="goReviews"><view class="stat-number">{{dashboard.reviews}}</view><view>待复核</view></view>
+      <view class="stat" bindtap="goTasks"><view class="stat-number">{{pendingTasks}}</view><view>复查任务</view></view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-head"><view class="name">今日巡园</view><view class="help" data-key="patrol" bindtap="showHelp">?</view></view>
+    <view class="grid">
+      <view class="action primary" bindtap="goCapture">拍照识别</view>
+      <view class="action" bindtap="goTasks">查看任务</view>
+    </view>
+  </view>
+
+  <view class="card">
+    <view class="section-head"><view class="name">最近巡查</view><view class="help" data-key="records" bindtap="showHelp">?</view></view>
+    <block wx:if="{{latest.length}}">
+      <view class="record" wx:for="{{latest}}" wx:key="id">
+        <image class="thumb" src="{{item.imageUrl}}" mode="aspectFill" />
+        <view class="grow"><view class="name">{{item.diseaseName}}</view><view class="muted">{{item.field.name}}</view><view class="tag">{{item.status}}</view></view>
+      </view>
+    </block>
+    <view class="empty" wx:else>暂无识别记录</view>
+  </view>
+
+  <view class="card quick-card">
+    <view class="section-head"><view class="name">业务说明</view><view class="help" data-key="reviews" bindtap="showHelp">?</view></view>
+    <view class="quick-row"><view bindtap="goReviews">待复核：AI识别完成，等待农技专家人工核验。</view></view>
+    <view class="quick-row"><view bindtap="goTasks">复查任务：初次复核存疑或处置后，需要二次核查的记录。</view></view>
+  </view>
+
+  <view class="guide-mask" wx:if="{{guideVisible}}" catchtap="finishGuide">
+    <view class="guide" catchtap="noop">
+      <view class="guide-kicker">首次使用</view>
+      <view class="guide-title">三步完成巡园闭环</view>
+      <view class="guide-step"><text>1</text><view><view>拍照上传</view><view>选择地块，拍清叶片正反面、嫩梢或虫体。</view></view></view>
+      <view class="guide-step"><text>2</text><view><view>AI识别</view><view>查看识别类别、置信度和治理建议。</view></view></view>
+      <view class="guide-step"><text>3</text><view><view>待复核/复查</view><view>不确定样本交由专家核验，存疑记录继续复查。</view></view></view>
+      <view class="guide-actions"><button class="button secondary" bindtap="finishGuide">暂不查看</button><button class="button" bindtap="startGuide">开始巡园</button></view>
+    </view>
+  </view>
+
+  <view class="guide-mask" wx:if="{{helpVisible}}" catchtap="closeHelp">
+    <view class="help-dialog" catchtap="noop"><view class="help-close" bindtap="closeHelp">×</view><view class="guide-title">{{helpTitle}}</view><view class="help-text">{{helpText}}</view></view>
+  </view>
+</view>

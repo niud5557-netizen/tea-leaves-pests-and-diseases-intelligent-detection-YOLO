@@ -17,5 +17,11 @@
   ],
   "image_size": 224,
   "checkpoint": "models\\tea_disease_pest_mobilenetv3_best.pth",
-  "model_family": "MobileNetV3-Small"
+  "model_family": "MobileNetV3-Small",
+  "operating_point": {
+    "confidence_threshold": 0.45,
+    "margin_threshold": 0.08,
+    "calibrated": false,
+    "reason": "该旧权重未包含 unknown 负样本；重新训练后由验证集自动校准"
+  }
 }

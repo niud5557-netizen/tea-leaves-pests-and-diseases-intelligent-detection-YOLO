@@ -1,63 +1,61 @@
-# AI茶查查 2.1｜茶园病虫害智能识别与绿色防控系统
+# AI茶查查
 
-本项目是面向中国国际大学生创新大赛展示的升级版交付包，已在原有茶叶病害识别基础上补齐虫害识别、三端联动、专家复核、处置复查、数据回流和模型证据链。
+茶园病虫害智能识别与绿色防控辅助系统，包含 PC 管理端、移动网页端、微信小程序源码、模型推理 API、专家复核、处置和复查闭环。
 
-## 已交付能力
+## Public Demo
 
-- **真实模型**：已训练 MobileNetV3-Small 分类模型并导出 ONNX，支持 13 类茶树健康/病害/虫害初筛。
-- **PC 管理端**：http://127.0.0.1:8080/manager/，支持看板、地块、识别记录、专家复核、处置任务和模型证据中心。
-- **移动网页端**：http://127.0.0.1:8080/mobile/，支持现场拍照上传、结果查看、复核和处置。
-- **微信小程序端**：miniprogram/，保留拍照识别、首页看板、地块、历史和任务页面源码。
-- **闭环流程**：上传图片 → 模型识别 → 低可信转复核 → 处置记录 → 复查闭环 → 数据留痕。
+- [公开首页](https://niud5557-netizen.github.io/tea-leaves-pests-and-diseases-intelligent-detection-YOLO/)
+- [管理网页](https://niud5557-netizen.github.io/tea-leaves-pests-and-diseases-intelligent-detection-YOLO/manager/)
+- [移动网页](https://niud5557-netizen.github.io/tea-leaves-pests-and-diseases-intelligent-detection-YOLO/mobile/)
 
-## 模型与数据
+公开网页为 GitHub Pages 静态演示版：识别记录保存在当前浏览器本地，上传图片不会发送到 GitHub。需要真实 ONNX 推理、跨设备数据和图片服务时，请按部署说明运行后端并为小程序配置 HTTPS 合法请求域名。
 
-- 原始数据来源：C:\Users\刁金生\Desktop\tea sickness dataset
-- 清洗后数据：dataset/prepared/imagefolder/
-- 原始样本计数：1434
-- 有效训练样本：1430
-- 去重/剔除样本：2
-- 跨类别冲突：2
-- 最佳验证准确率：80.60%
-- 测试集准确率：78.16%
-- 模型文件：models/tea_disease_pest.onnx
-- 指标文件：models/metrics.json
+## Current model boundary
 
-## 支持类别
+当前运行模型是导出为 ONNX 的 MobileNetV3-Small 图像分类器，是开放集初筛基线，不是 YOLO 检测器，也不是病斑分割模型。加入 `unknown` 负样本后，推理会拒识非茶叶或不确定图片，而不是强行输出病害类别。
 
-healthy、lgal_leaf、nthracnose、ird_eye_spot、rown_blight、gray_blight、ed_leaf_spot、white_spot、	ea_white_scab、	ea_blister_blight、	ea_blister_blight_perforation、leaf_beetle、polygus_lucorum。
+分类器 API 不返回病斑框、虫体框、病斑面积或严重程度；这些能力需要带框标注的 YOLO 检测模型或掩膜级分割模型重新训练。
 
-## 快速启动
+## 本地运行
 
-`powershell
-cd "C:\Users\刁金生\Desktop\tea test"
+```powershell
+cd "C:\Users\刁金生\Desktop\tea\tea test"
 powershell -ExecutionPolicy Bypass -File .\scripts\start.ps1
-`
+```
 
-访问：
+打开 `http://127.0.0.1:8080/manager/` 管理网页、`http://127.0.0.1:8080/mobile/` 移动网页，或访问 `http://127.0.0.1:8080/api/health` 检查服务。
 
-- PC 管理端：http://127.0.0.1:8080/manager/
-- 移动网页端：http://127.0.0.1:8080/mobile/
-- API 健康检查：http://127.0.0.1:8080/api/health
+停止本地服务：
 
-停止服务：
-
-`powershell
+```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\stop.ps1
-`
+```
 
-## 重新训练
+## 重新训练拒识模型
 
-`powershell
-cd "C:\Users\刁金生\Desktop\tea test"
+建议准备 `healthy_leaf`、`weeds`、`soil`、`non_tea` 四组负样本，放在同一个目录下，例如 `C:\Users\刁金生\Desktop\tea negative samples`。
+
+```powershell
+cd "C:\Users\刁金生\Desktop\tea\tea test"
 $env:PYTHONPATH=$null
-.\.venv\Scripts\python.exe .\scripts\prepare_dataset.py --source "C:\Users\刁金生\Desktop\tea sickness dataset" --output .\dataset\prepared
-.\.venv\Scripts\python.exe .\scripts\train.py --data .\dataset\prepared\imagefolder --out .\models --epochs 12 --batch-size 48 --image-size 224
-.\.venv\Scripts\python.exe .\scripts\export_model.py --checkpoint .\models\tea_disease_pest_mobilenetv3_best.pth --output .\models\tea_disease_pest.onnx
-`
+.\.venv\Scripts\python.exe .\scripts\prepare_dataset.py `
+  --source "C:\Users\刁金生\Desktop\tea sickness dataset" `
+  --negative-source "C:\Users\刁金生\Desktop\tea negative samples" `
+  --output .\dataset\prepared
+.\.venv\Scripts\python.exe .\scripts\train.py `
+  --data .\dataset\prepared\imagefolder `
+  --out .\models `
+  --epochs 40 --batch-size 32 --image-size 320 `
+  --balance sampler --mixup-alpha 0.20
+.\.venv\Scripts\python.exe .\scripts\export_model.py `
+  --checkpoint .\models\tea_disease_pest_mobilenetv3_best.pth `
+  --output .\models\tea_disease_pest.onnx
+```
 
-## 能力边界
+训练脚本会把逐类 Precision、Recall、F1、宏平均 F1、balanced accuracy 和混淆矩阵写入 `models/metrics.json`，并从验证集校准拒识阈值后写入 `models/model_metadata.json`。
 
-- 当前模型是**图像分类模型**，不是虫体检测模型，也不是病斑分割模型。
-- 页面中的疑似区域框和严重度用于演示辅助决策，未使用框级/掩膜级监督训练。
-- 国赛答辩时应把当前指标表述为“公开+本地数据集初筛基线”，田间生产指标需要外部茶园盲测和专家签字样本继续验证。
+完整的数据策略、检测器迁移条件、推理阈值和评估方案见 [MODEL_OPTIMIZATION_PLAN.md](docs/MODEL_OPTIMIZATION_PLAN.md)。
+
+## 微信小程序
+
+在微信开发者工具中导入 `C:\Users\刁金生\Desktop\tea\tea test\miniprogram`。电脑与手机真机联调时，服务需监听局域网地址，小程序当前默认请求 `http://10.245.179.101:8080`；若电脑 Wi-Fi 地址变化，请同步修改 `miniprogram/app.js` 中的 `globalData.baseUrl`。开发者工具和真机调试还需关闭合法域名校验。正式使用必须切换为 HTTPS 后端，并在微信公众平台配置合法请求域名。当前小程序已包含首页统计、首次引导、帮助说明、拍照/相册识别、治理建议、历史记录和复查任务。
