@@ -45,19 +45,30 @@ function knowledgeFor(database, code) {
   return database.knowledge.find((item) => item.code === code) || database.knowledge.find((item) => item.code === 'unknown');
 }
 
-function displayRecord(record, database) {
+function assetOrigin(request) {
+  const configured = String(process.env.PUBLIC_BASE_URL || '').replace(/\/$/, '');
+  if (configured) return configured;
+  if (!request) return '';
+  const forwarded = request.headers['x-forwarded-proto'];
+  const protocol = String(forwarded || (request.secure ? 'https' : 'http')).split(',')[0].trim();
+  return protocol + '://' + request.get('host');
+}
+
+function displayRecord(record, database, request) {
   const field = database.fields.find((item) => item.id === record.fieldId);
   const knowledge = knowledgeFor(database, record.result.classCode);
+  const origin = assetOrigin(request);
+  const imagePath = record.imageFile ? '/uploads/' + encodeURIComponent(record.imageFile) : '';
   return {
     ...record,
-    imageUrl: '/uploads/' + record.imageFile,
+    imageUrl: origin + imagePath,
     field,
     diseaseName: knowledge?.name || record.result.classCode,
     advice: record.advice || knowledge?.advice || ''
   };
 }
 
-function dashboard(database) {
+function dashboard(database, request) {
   const records = database.records;
   const unresolved = records.filter((item) => !['closed', 'healthy'].includes(item.status)).length;
   const reviews = records.filter((item) => item.status === 'expert_review').length;
@@ -76,7 +87,7 @@ function dashboard(database) {
     completionRate: database.tasks.length ? Math.round(completedTasks / database.tasks.length * 100) : 0,
     classCounts,
     model: database.model,
-    latestRecords: records.slice(0, 8).map((record) => displayRecord(record, database))
+    latestRecords: records.slice(0, 8).map((record) => displayRecord(record, database, request))
   };
 }
 
@@ -94,7 +105,7 @@ app.get('/api/health', async (_request, response) => {
   const database = await loadDatabase();
   response.json({ ok: true, service: 'AI茶查查统一服务', version: '2.0.0', time: new Date().toISOString(), model: database.model });
 });
-app.get('/api/dashboard', async (_request, response) => response.json(dashboard(await loadDatabase())));
+app.get('/api/dashboard', async (request, response) => response.json(dashboard(await loadDatabase(), request)));
 app.get('/api/model', async (_request, response) => response.json((await loadDatabase()).model));
 app.get('/api/knowledge', async (_request, response) => {
   const database = await loadDatabase();
@@ -131,14 +142,14 @@ app.get('/api/records', async (request, response) => {
   let records = database.records;
   if (request.query.fieldId) records = records.filter((item) => item.fieldId === request.query.fieldId);
   if (request.query.status) records = records.filter((item) => item.status === request.query.status);
-  response.json(records.map((record) => displayRecord(record, database)));
+  response.json(records.map((record) => displayRecord(record, database, request)));
 });
 
 app.get('/api/records/:id', async (request, response) => {
   const database = await loadDatabase();
   const record = database.records.find((item) => item.id === request.params.id);
   if (!record) return response.status(404).json({ error: '记录不存在' });
-  response.json(displayRecord(record, database));
+  response.json(displayRecord(record, database, request));
 });
 
 app.post('/api/predict', upload.single('image'), async (request, response) => {
@@ -157,7 +168,7 @@ app.post('/api/predict', upload.single('image'), async (request, response) => {
       result: analysis, advice: knowledge?.advice || '', expertReview: null, treatment: null, recheck: null
     };
     database.records.unshift(item);
-    return displayRecord(item, database);
+    return displayRecord(item, database, request);
   });
   response.status(201).json(record);
 });
@@ -173,7 +184,7 @@ app.post('/api/records/:id/review', async (request, response) => {
     record.expertReview = { expert: request.body.expert || '示范农技专家', comment: request.body.comment || '已复核', reviewedAt: new Date().toISOString() };
     record.advice = knowledgeFor(database, classCode)?.advice || record.advice;
     record.status = 'reviewed';
-    return displayRecord(record, database);
+    return displayRecord(record, database, request);
   });
   if (!updated) return response.status(404).json({ error: '记录不存在' });
   response.json(updated);
@@ -191,7 +202,7 @@ app.post('/api/records/:id/treatment', async (request, response) => {
     record.status = 'treated';
     const task = { id: createId('task'), recordId: record.id, fieldId: record.fieldId, title: '复查：' + (knowledge?.name || record.result.classCode), dueAt, status: 'pending', assignee: request.body.operator || '巡园员', createdAt: new Date().toISOString() };
     database.tasks.unshift(task);
-    return { record: displayRecord(record, database), task };
+    return { record: displayRecord(record, database, request), task };
   });
   if (!result) return response.status(404).json({ error: '记录不存在' });
   response.status(201).json(result);
@@ -206,7 +217,7 @@ app.post('/api/records/:id/recheck', async (request, response) => {
     for (const task of database.tasks.filter((item) => item.recordId === record.id && item.status !== 'completed')) {
       task.status = 'completed'; task.completedAt = new Date().toISOString();
     }
-    return displayRecord(record, database);
+    return displayRecord(record, database, request);
   });
   if (!result) return response.status(404).json({ error: '记录不存在' });
   response.json(result);
@@ -227,9 +238,9 @@ app.post('/api/tasks/:id/complete', async (request, response) => {
   response.json(task);
 });
 
-app.get('/api/report/summary', async (_request, response) => {
+app.get('/api/report/summary', async (request, response) => {
   const database = await loadDatabase();
-  response.json({ generatedAt: new Date().toISOString(), dashboard: dashboard(database), fields: database.fields, records: database.records.map((record) => displayRecord(record, database)), tasks: database.tasks });
+  response.json({ generatedAt: new Date().toISOString(), dashboard: dashboard(database, request), fields: database.fields, records: database.records.map((record) => displayRecord(record, database, request)), tasks: database.tasks });
 });
 
 app.use((error, _request, response, _next) => {
